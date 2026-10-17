@@ -63,7 +63,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu *</label>
-            <input id="regPassword" type="password" required placeholder="Mật khẩu" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none" />
+            <input id="regPassword" type="password" required placeholder="Nhập mật khẩu" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
@@ -80,7 +80,7 @@
               <option value="10A1">Khối 10 - Lớp 10A1</option>
               <option value="10A2">Khối 10 - Lớp 10A2</option>
               <option value="11B1">Khối 11 - Lớp 11B1</option>
-              <option value="12C1">Khối 12 - Lớp 12A1</option>
+              <option value="12C1">Khối 12 - Lớp 12C1</option>
             </select>
           </div>
         </div>
@@ -88,8 +88,6 @@
           Gửi yêu cầu đăng ký (Chờ duyệt)
         </button>
       </form>
-      </div>
-      </div>
     </div>
   </div>
 
@@ -156,7 +154,7 @@
               <option value="10A1">Lớp 10A1</option>
               <option value="10A2">Lớp 10A2</option>
               <option value="11B1">Lớp 11B1</option>
-              <option value="12C1">Lớp 12A1</option>
+              <option value="12C1">Lớp 12C1</option>
             </select>
           </div>
         </div>
@@ -173,9 +171,10 @@
         <!-- Form Thêm Thành Viên Trực Tiếp (Dành cho GV thêm HS / Admin thêm GV & HS) -->
         <div id="directAddUserBox" class="hidden p-3.5 rounded-lg bg-slate-50 border border-slate-200">
           <div class="text-xs font-bold text-slate-800 mb-2">Thêm tài khoản trực tiếp (Đã duyệt sẵn)</div>
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
             <input id="addNameInput" type="text" placeholder="Họ và tên" class="rounded border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
             <input id="addUserInput" type="text" placeholder="Tên đăng nhập" class="rounded border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
+            <input id="addPassInput" type="password" placeholder="Mật khẩu" class="rounded border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
             <select id="addRoleInput" class="rounded border border-slate-300 px-2.5 py-1.5 text-xs bg-white">
               <option value="student">Học sinh</option>
               <option value="teacher">Giáo viên</option>
@@ -184,7 +183,7 @@
               <option value="10A1">Lớp 10A1 (Khối 10)</option>
               <option value="10A2">Lớp 10A2 (Khối 10)</option>
               <option value="11B1">Lớp 11B1 (Khối 11)</option>
-              <option value="12C1">Lớp 12A1 (Khối 12)</option>
+              <option value="12C1">Lớp 12C1 (Khối 12)</option>
             </select>
             <button type="button" onclick="addDirectAccount()" class="rounded bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-1.5 px-3">
               + Thêm tài khoản
@@ -221,10 +220,10 @@
           <div class="flex flex-wrap items-center gap-2">
             <label class="text-xs font-semibold text-slate-600">Chọn lớp:</label>
             <select id="scheduleClassSelect" onchange="changeScheduleClass(this.value)" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold bg-white">
-              <option value="10A1">Lớp 10A1 (GVCN: Cô Trần Thu Hà)</option>
-              <option value="10A2">Lớp 10A2 (GVCN: Thầy Nguyễn Quốc Bảo)</option>
-              <option value="11B1">Lớp 11B1 (GVCN: Thầy Đặng Hoàng Long)</option>
-              <option value="12C1">Lớp 12A1 (GVCN: Cô Lê Phương Thảo)</option>
+              <option value="10A1">Lớp 10A1</option>
+              <option value="10A2">Lớp 10A2</option>
+              <option value="11B1">Lớp 11B1</option>
+              <option value="12C1">Lớp 12C1</option>
             </select>
           </div>
         </div>
@@ -424,7 +423,7 @@
     </div>
   </div>
 
-  <!-- THÔNG BÁO NHỏ (TOAST) -->
+  <!-- THÔNG BÁO NHỎ (TOAST) -->
   <div id="toastBox" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-semibold shadow-lg"></div>
 
   <script>
@@ -447,21 +446,25 @@
       { id: 5, name: 'Tiết 5', time: '14:25 - 15:10' }
     ];
 
+    const STORAGE_KEY = 'lms_simple_auth_v2';
+
     function getDefaultData() {
       return {
         currentUser: null,
         selectedClass: '10A1',
-        // Danh sách tài khoản:
-        // status: 'approved' | 'pending_teacher' (chờ GV duyệt) | 'pending_admin' (chờ Admin duyệt)
+        // Chỉ giữ duy nhất tài khoản Admin mặc định
         users: [
-          { id: 'u1', username: 'adminhoangtheanh', password: 'HTheAnheag09@', fullName: 'Quản Trị Viên (Admin)', role: 'admin', grade: 'Toàn trường', className: 'All', status: 'approved', canPost: true },
-          { id: 'u2', username: 'gv_ha', password: '123', fullName: 'Cô Trần Thu Hà (GVCN 10A1)', role: 'teacher', grade: '10', className: '10A1', status: 'approved', canPost: true },
-          { id: 'u3', username: 'gv_long', password: '123', fullName: 'Thầy Đặng Hoàng Long (GVCN 11B1)', role: 'teacher', grade: '11', className: '11B1', status: 'approved', canPost: true },
-          { id: 'u4', username: 'hs_an', password: '123', fullName: 'Nguyễn Minh An', role: 'student', grade: '10', className: '10A1', status: 'approved', canPost: false },
-          { id: 'u5', username: 'hs_tran', password: '123', fullName: 'Lê Bảo Trân', role: 'student', grade: '10', className: '10A2', status: 'approved', canPost: false },
-          // 2 tài khoản chờ duyệt mẫu để test ngay luồng duyệt
-          { id: 'u6', username: 'hs_moi', password: '123', fullName: 'Phạm Hoàng Nam (HS đăng ký mới)', role: 'student', grade: '10', className: '10A1', status: 'pending_teacher', canPost: false },
-          { id: 'u7', username: 'gv_moi', password: '123', fullName: 'Thầy Vũ Minh Quân (GV đăng ký mới)', role: 'teacher', grade: '12', className: '12C1', status: 'pending_admin', canPost: true }
+          {
+            id: 'u_admin',
+            username: 'adminhoangtheanh',
+            password: 'HTheAnheag09@',
+            fullName: 'Hoàng Thế Anh (Admin)',
+            role: 'admin',
+            grade: 'Toàn trường',
+            className: 'All',
+            status: 'approved',
+            canPost: true
+          }
         ],
         schedules: {
           '10A1': {
@@ -499,7 +502,7 @@
             subject: 'Toán Học',
             file: 'De_Bai_Tap_Ham_So_Lop10.pdf',
             desc: 'Hoàn thành 5 bài tự luận trong file đính kèm và nộp lại file bài giải trước thứ Sáu.',
-            teacher: 'Cô Trần Thu Hà',
+            teacher: 'Giáo viên bộ môn',
             submittedBy: []
           },
           {
@@ -508,7 +511,7 @@
             subject: 'Tiếng Anh',
             file: 'Huong_Dan_Writing_Unit3.docx',
             desc: 'Tải file hướng dẫn cấu trúc câu và nộp bài viết định dạng DOCX hoặc PDF.',
-            teacher: 'Cô Trần Thu Hà',
+            teacher: 'Giáo viên bộ môn',
             submittedBy: []
           }
         ],
@@ -531,23 +534,22 @@
           }
         ],
         videos: [
-          { id: 'v1', title: 'Video bài giảng: Cách tìm đỉnh và trục đối xứng Parabol', subject: 'Toán Học', teacher: 'Cô Trần Thu Hà' },
-          { id: 'v2', title: 'Video bài giảng: Ngữ pháp thì Hiện tại hoàn thành', subject: 'Tiếng Anh', teacher: 'Cô Trần Thu Hà' }
+          { id: 'v1', title: 'Video bài giảng: Cách tìm đỉnh và trục đối xứng Parabol', subject: 'Toán Học', teacher: 'Giáo viên bộ môn' },
+          { id: 'v2', title: 'Video bài giảng: Ngữ pháp thì Hiện tại hoàn thành', subject: 'Tiếng Anh', teacher: 'Giáo viên bộ môn' }
         ],
-        feedbacks: [
-          { id: 'f1', type: 'Báo lỗi', author: 'Nguyễn Minh An (HS)', content: 'File đề Toán câu 3 bị mờ chữ, nhờ cô kiểm tra lại ạ.', resolved: false }
-        ]
+        feedbacks: []
       };
     }
 
     let state = getDefaultData();
     try {
-      const saved = localStorage.getItem('lms_simple_auth_v1');
+      localStorage.removeItem('lms_simple_auth_v1');
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) state = Object.assign(getDefaultData(), JSON.parse(saved));
     } catch (e) {}
 
     function saveState() {
-      try { localStorage.setItem('lms_simple_auth_v1', JSON.stringify(state)); } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
     }
 
     function notify(msg) {
@@ -582,16 +584,10 @@
       el.textContent = text;
     }
 
-    window.fillDemoLogin = function(u, p) {
-      switchAuthTab('login');
-      document.getElementById('loginUsername').value = u;
-      document.getElementById('loginPassword').value = p;
-    };
-
     window.handleLogin = function(e) {
       e.preventDefault();
       const u = document.getElementById('loginUsername').value.trim();
-      const p = document.getElementById('loginPassword').value.trim();
+      const p = document.getElementById('loginPassword').value;
 
       const account = state.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
       if (!account) {
@@ -619,7 +615,7 @@
       e.preventDefault();
       const fullName = document.getElementById('regFullName').value.trim();
       const username = document.getElementById('regUsername').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
+      const password = document.getElementById('regPassword').value;
       const role = document.getElementById('regRole').value;
       const className = document.getElementById('regClass').value;
 
@@ -902,11 +898,12 @@
 
       const fullName = document.getElementById('addNameInput').value.trim();
       const username = document.getElementById('addUserInput').value.trim();
+      const password = document.getElementById('addPassInput').value;
       const role = document.getElementById('addRoleInput').value;
       const className = document.getElementById('addClassInput').value;
 
-      if (!fullName || !username) {
-        notify('Vui lòng nhập đủ Họ tên và Tên đăng nhập!');
+      if (!fullName || !username || !password) {
+        notify('Vui lòng nhập đủ Họ tên, Tên đăng nhập và Mật khẩu!');
         return;
       }
       if (role === 'teacher' && curr.role !== 'admin') {
@@ -921,7 +918,7 @@
       state.users.push({
         id: 'u_' + Date.now(),
         username,
-        password: '123',
+        password,
         fullName,
         role,
         grade: className.slice(0, 2),
@@ -932,9 +929,10 @@
 
       document.getElementById('addNameInput').value = '';
       document.getElementById('addUserInput').value = '';
+      document.getElementById('addPassInput').value = '';
       saveState();
       renderUsersSection();
-      notify(`Đã thêm tài khoản "${username}" (Mật khẩu mặc định: 123)`);
+      notify(`Đã thêm tài khoản "${username}" thành công!`);
     };
 
     window.toggleRoleUpgrade = function(userId) {
@@ -1302,6 +1300,10 @@
 
     function renderFeedbackSection() {
       const isStaff = state.currentUser && state.currentUser.role !== 'student';
+      if (state.feedbacks.length === 0) {
+        document.getElementById('feedbackList').innerHTML = '<div class="text-xs text-slate-400">Chưa có báo lỗi hoặc góp ý nào.</div>';
+        return;
+      }
       document.getElementById('feedbackList').innerHTML = state.feedbacks.map(f => `
         <div class="p-3 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
           <div>
